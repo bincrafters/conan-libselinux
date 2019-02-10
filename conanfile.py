@@ -42,6 +42,7 @@ class LibSELinuxConan(ConanFile):
     def build(self):
         pcre_inc = os.path.join(self.deps_cpp_info["pcre2"].rootpath,
                                 self.deps_cpp_info["pcre2"].includedirs[0])
+        pcre_libs = ' '.join(["-l%s" % lib for lib in self.deps_cpp_info["pcre2"].libs])
         sepol_inc = os.path.join(self.source_folder, self._sepol_subfolder, "include")
         with tools.chdir(os.path.join(self._sepol_subfolder, "src")):
             args = ["libsepol.so.1" if self.options.shared else "libsepol.a"]
@@ -49,7 +50,8 @@ class LibSELinuxConan(ConanFile):
             env_build.make(args=args)
         with tools.chdir(os.path.join(self._selinux_subfolder, "src")):
             args = ["libselinux.so.1" if self.options.shared else "libselinux.a",
-                    'PCRE_CFLAGS=-DPCRE2_CODE_UNIT_WIDTH=8 -DUSE_PCRE2=1 -I%s -I%s' % (pcre_inc, sepol_inc)]
+                    'PCRE_CFLAGS=-DPCRE2_CODE_UNIT_WIDTH=8 -DUSE_PCRE2=1 -I%s -I%s' % (pcre_inc, sepol_inc),
+                    'PCRE_LDLIBS=%s' % pcre_libs]
             env_build = AutoToolsBuildEnvironment(self)
             env_build.make(args=args)
 
