@@ -1,74 +1,64 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, tools, AutoToolsBuildEnvironment
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
-class LibnameConan(ConanFile):
-    name = "libname"
-    version = "0.0.0"
-    description = "Keep it short"
-    # topics can get used for searches, GitHub topics, Bintray tags etc. Add here keywords about the library
-    topics = ("conan", "libname", "logging")
-    url = "https://github.com/bincrafters/conan-libname"
-    homepage = "https://github.com/original_author/original_lib"
+class LibSELinuxConan(ConanFile):
+    name = "libselinux"
+    version = "2.8"
+    description = "Security-enhanced Linux is a patch of the Linux kernel and a number of utilities with enhanced security functionality designed to add mandatory access controls to Linux"
+    topics = ("conan", "selinux", "security-enhanced linux")
+    url = "https://github.com/bincrafters/conan-libselinux"
+    homepage = "https://github.com/SELinuxProject/selinux"
     author = "Bincrafters <bincrafters@gmail.com>"
-    license = "MIT"  # Indicates license type of the packaged library; please use SPDX Identifiers https://spdx.org/licenses/
-    exports = ["LICENSE.md"]      # Packages the license for the conanfile.py
-    # Remove following lines if the target lib does not use cmake.
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-
-    # Options may need to change depending on the packaged library.
+    license = "Unlicense"  # This library (libselinux) is public domain software, i.e. not copyrighted
+    exports = ["LICENSE.md"]
     settings = "os", "arch", "compiler", "build_type"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
+    _sepol_subfolder = "libsepol-%s" % version
+    _selinux_subfolder = "libselinux-%s" % version
+    _date = "20180524"
+    requires = ("pcre2/10.32@bincrafters/stable",)
 
-    # Custom attributes for Bincrafters recipe conventions
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
+    def configure(self):
+        del self.settings.compiler.libcxx
+        if self.settings.os != "Linux":
+            raise ConanInvalidConfiguration("only Linux is supported")
 
-    requires = (
-        "OpenSSL/1.0.2p@conan/stable",
-        "zlib/1.2.11@conan/stable"
-    )
-
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
+    def build_requirements(self):
+        if not tools.which("flex"):
+            self.build_requires("flex/2.6.4@bincrafters/stable")
 
     def source(self):
-        source_url = "https://github.com/libauthor/libname"
-        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version), sha256="Please-provide-a-checksum")
-        extracted_dir = self.name + "-" + self.version
-
-        # Rename to "source_subfolder" is a convention to simplify later steps
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_TESTS"] = False  # example
-        cmake.configure(build_folder=self._build_subfolder)
-        return cmake
+        source_url = "https://github.com/SELinuxProject/selinux/releases/download/%s/libselinux-%s.tar.gz" % (self._date, self.version)
+        tools.get(source_url, sha256="31db96ec7643ce10912b3c3f98506a08a9116dcfe151855fd349c3fda96187e1")
+        source_url = "https://github.com/SELinuxProject/selinux/releases/download/%s/libsepol-%s.tar.gz" % (self._date, self.version)
+        tools.get(source_url, sha256="3ad6916a8352bef0bad49acc8037a5f5b48c56f94e4cb4e1959ca475fa9d24d6")
 
     def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+        pcre_inc = os.path.join(self.deps_cpp_info["pcre2"].rootpath,
+                                self.deps_cpp_info["pcre2"].includedirs[0])
+        sepol_inc = os.path.join(self.source_folder, self._sepol_subfolder, "include")
+        with tools.chdir(os.path.join(self._sepol_subfolder, "src")):
+            args = ["libsepol.so.1" if self.options.shared else "libsepol.a"]
+            env_build = AutoToolsBuildEnvironment(self)
+            env_build.make(args=args)
+        with tools.chdir(os.path.join(self._selinux_subfolder, "src")):
+            args = ["libselinux.so.1" if self.options.shared else "libselinux.a",
+                    'PCRE_CFLAGS=-DPCRE2_CODE_UNIT_WIDTH=8 -DUSE_PCRE2=1 -I%s -I%s' % (pcre_inc, sepol_inc)]
+            env_build = AutoToolsBuildEnvironment(self)
+            env_build.make(args=args)
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
-        cmake.install()
-        # If the CMakeLists.txt has a proper install method, the steps below may be redundant
-        # If so, you can just remove the lines below
-        include_folder = os.path.join(self._source_subfolder, "include")
-        self.copy(pattern="*", dst="include", src=include_folder)
-        self.copy(pattern="*.dll", dst="bin", keep_path=False)
-        self.copy(pattern="*.lib", dst="lib", keep_path=False)
-        self.copy(pattern="*.a", dst="lib", keep_path=False)
-        self.copy(pattern="*.so*", dst="lib", keep_path=False)
-        self.copy(pattern="*.dylib", dst="lib", keep_path=False)
+        self.copy(pattern="LICENSE", dst="licenses", src=self._selinux_subfolder)
+        for library in [self._sepol_subfolder, self._selinux_subfolder]:
+            self.copy(pattern="*.h", dst="include", src=os.path.join(library, "include"), keep_path=True)
+            self.copy(pattern="*.so*", dst="lib", src=library, keep_path=False)
+            self.copy(pattern="*.a", dst="lib", src=library, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = ["selinux", "sepol"]
