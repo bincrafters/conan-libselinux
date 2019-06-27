@@ -31,7 +31,7 @@ class LibSELinuxConan(ConanFile):
 
     def build_requirements(self):
         if not tools.which("flex"):
-            self.build_requires("flex/2.6.4@bincrafters/stable")
+            self.build_requires("flex_installer/2.6.4@bincrafters/stable")
 
     def source(self):
         source_url = "https://github.com/SELinuxProject/selinux/releases/download/%s/libselinux-%s.tar.gz" % (self._date, self.version)
