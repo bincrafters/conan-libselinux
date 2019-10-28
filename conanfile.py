@@ -18,7 +18,7 @@ class LibSELinuxConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     _sepol_subfolder = "libsepol-%s" % version
     _selinux_subfolder = "libselinux-%s" % version
-    _date = " 20190315"
+    _date = "20190315"
     requires = ("pcre2/10.33",)
 
     def configure(self):
