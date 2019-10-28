@@ -22,7 +22,7 @@ class LibSELinuxConan(ConanFile):
     _sepol_subfolder = "libsepol-%s" % version
     _selinux_subfolder = "libselinux-%s" % version
     _date = "20180524"
-    requires = ("pcre2/10.32",)
+    requires = ("pcre2/10.33",)
 
     def configure(self):
         del self.settings.compiler.libcxx
