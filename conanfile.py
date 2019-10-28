@@ -5,7 +5,7 @@ import os
 
 class LibSELinuxConan(ConanFile):
     name = "libselinux"
-    version = "2.8"
+    version = "2.9"
     description = "Security-enhanced Linux is a patch of the Linux kernel and a number of utilities with enhanced security functionality designed to add mandatory access controls to Linux"
     topics = ("conan", "selinux", "security-enhanced linux")
     url = "https://github.com/bincrafters/conan-libselinux"
@@ -18,7 +18,7 @@ class LibSELinuxConan(ConanFile):
     default_options = {"shared": False, "fPIC": True}
     _sepol_subfolder = "libsepol-%s" % version
     _selinux_subfolder = "libselinux-%s" % version
-    _date = "20180524"
+    _date = " 20190315"
     requires = ("pcre2/10.33",)
 
     def configure(self):
@@ -33,9 +33,9 @@ class LibSELinuxConan(ConanFile):
 
     def source(self):
         source_url = "https://github.com/SELinuxProject/selinux/releases/download/%s/libselinux-%s.tar.gz" % (self._date, self.version)
-        tools.get(source_url, sha256="31db96ec7643ce10912b3c3f98506a08a9116dcfe151855fd349c3fda96187e1")
+        tools.get(source_url, sha256="1bccc8873e449587d9a2b2cf253de9b89a8291b9fbc7c59393ca9e5f5f4d2693")
         source_url = "https://github.com/SELinuxProject/selinux/releases/download/%s/libsepol-%s.tar.gz" % (self._date, self.version)
-        tools.get(source_url, sha256="3ad6916a8352bef0bad49acc8037a5f5b48c56f94e4cb4e1959ca475fa9d24d6")
+        tools.get(source_url, sha256="a34b12b038d121e3e459b1cbaca3c9202e983137819c16baf63658390e3f1d5d")
 
     def build(self):
         pcre_inc = os.path.join(self.deps_cpp_info["pcre2"].rootpath,
