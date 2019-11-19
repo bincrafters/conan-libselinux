@@ -10,7 +10,6 @@ class LibSELinuxConan(ConanFile):
     topics = ("conan", "selinux", "security-enhanced linux")
     url = "https://github.com/bincrafters/conan-libselinux"
     homepage = "https://github.com/SELinuxProject/selinux"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "Unlicense"  # This library (libselinux) is public domain software, i.e. not copyrighted
     exports = ["LICENSE.md"]
     settings = "os", "arch", "compiler", "build_type"
