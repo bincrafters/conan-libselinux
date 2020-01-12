@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from conans import ConanFile, tools, AutoToolsBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
 import os
@@ -13,7 +10,6 @@ class LibSELinuxConan(ConanFile):
     topics = ("conan", "selinux", "security-enhanced linux")
     url = "https://github.com/bincrafters/conan-libselinux"
     homepage = "https://github.com/SELinuxProject/selinux"
-    author = "Bincrafters <bincrafters@gmail.com>"
     license = "Unlicense"  # This library (libselinux) is public domain software, i.e. not copyrighted
     exports = ["LICENSE.md"]
     settings = "os", "arch", "compiler", "build_type"
@@ -22,10 +18,11 @@ class LibSELinuxConan(ConanFile):
     _sepol_subfolder = "libsepol-%s" % version
     _selinux_subfolder = "libselinux-%s" % version
     _date = "20180524"
-    requires = ("pcre2/10.32",)
+    requires = ("pcre2/10.33",)
 
     def configure(self):
         del self.settings.compiler.libcxx
+        del self.settings.compiler.cppstd
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("only Linux is supported")
 
