@@ -1,0 +1,6 @@
+sources:
+  "2.9":
+    - url: "https://github.com/SELinuxProject/selinux/releases/download/20190315/libselinux-2.9.tar.gz"
+      sha256: "1bccc8873e449587d9a2b2cf253de9b89a8291b9fbc7c59393ca9e5f5f4d2693"
+    - url: "https://github.com/SELinuxProject/selinux/releases/download/20190315/libsepol-2.9.tar.gz"
+      sha256: "a34b12b038d121e3e459b1cbaca3c9202e983137819c16baf63658390e3f1d5d"
