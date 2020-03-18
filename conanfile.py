@@ -41,12 +41,12 @@ class LibSELinuxConan(ConanFile):
         pcre_inc = os.path.join(self.deps_cpp_info["pcre2"].rootpath,
                                 self.deps_cpp_info["pcre2"].includedirs[0])
         pcre_libs = ' '.join(["-l%s" % lib for lib in self.deps_cpp_info["pcre2"].libs])
-        sepol_inc = os.path.join(self.source_folder, self._sepol_subfolder, "include")
-        with tools.chdir(os.path.join(self._sepol_subfolder, "src")):
+        sepol_inc = os.path.join(self.source_folder, _sepol_subfolder, "include")
+        with tools.chdir(os.path.join(_sepol_subfolder, "src")):
             args = ["libsepol.so.1" if self.options.shared else "libsepol.a"]
             env_build = AutoToolsBuildEnvironment(self)
             env_build.make(args=args)
-        with tools.chdir(os.path.join(self._selinux_subfolder, "src")):
+        with tools.chdir(os.path.join(_selinux_subfolder, "src")):
             args = ["libselinux.so.1" if self.options.shared else "libselinux.a",
                     'PCRE_CFLAGS=-DPCRE2_CODE_UNIT_WIDTH=8 -DUSE_PCRE2=1 -I%s -I%s' % (pcre_inc, sepol_inc),
                     'PCRE_LDLIBS=%s' % pcre_libs]
@@ -55,8 +55,8 @@ class LibSELinuxConan(ConanFile):
 
     def package(self):
         _sepol_subfolder, _selinux_subfolder = self._get_subfolders()
-        self.copy(pattern="LICENSE", dst="licenses", src=self._selinux_subfolder)
-        for library in [self._sepol_subfolder, self._selinux_subfolder]:
+        self.copy(pattern="LICENSE", dst="licenses", src=_selinux_subfolder)
+        for library in [_sepol_subfolder, _selinux_subfolder]:
             self.copy(pattern="*.h", dst="include", src=os.path.join(library, "include"), keep_path=True)
             self.copy(pattern="*.so*", dst="lib", src=library, keep_path=False)
             self.copy(pattern="*.a", dst="lib", src=library, keep_path=False)
