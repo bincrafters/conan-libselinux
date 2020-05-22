@@ -29,7 +29,7 @@ class LibSELinuxConan(ConanFile):
 
     def build_requirements(self):
         if not tools.which("flex"):
-            self.build_requires("flex_installer/2.6.4@bincrafters/stable")
+            self.build_requires("flex/2.6.4")
 
     def source(self):
         for download in self.conan_data["sources"][self.version]:
